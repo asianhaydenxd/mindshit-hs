@@ -16,6 +16,14 @@ alterTape n (Tape t p) = Tape (replace t p ((item + n) `mod` 256)) p where
         | i == 0    = n : tail l
         | otherwise = let (x,_:xs) = splitAt i l in x ++ n : l
 
+shiftRight :: Tape -> Tape = shiftTape 1
+
+shiftLeft :: Tape -> Tape = shiftTape (-1)
+
+increment :: Tape -> Tape = alterTape 1
+
+decrement :: Tape -> Tape = alterTape (-1)
+
 interpret :: String -> IO ()
 interpret code = interpret' code (Tape [0] 0) where
     interpret' :: String -> Tape -> IO ()
