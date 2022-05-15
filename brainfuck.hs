@@ -2,6 +2,8 @@ module Brainfuck where
 
 data Tape = Tape [Int] Int | TapeError deriving Show
 
+newTape :: Tape = Tape [0] 0
+
 shiftTape :: Int -> Tape -> Tape
 shiftTape n (Tape t p)
     | p + n >= length t || p + n < 0 = TapeError
