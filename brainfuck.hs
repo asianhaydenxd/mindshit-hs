@@ -27,5 +27,6 @@ decrement :: Tape -> Tape = alterTape (-1)
 interpret :: String -> IO ()
 interpret code = interpret' code (Tape [0] 0) where
     interpret' :: String -> Tape -> IO ()
+    interpret' _ TapeError       = putStrLn "exit: tapeError"
     interpret' [] _              = putStrLn "exit"
     interpret' (c:cs) (Tape t p) = undefined
