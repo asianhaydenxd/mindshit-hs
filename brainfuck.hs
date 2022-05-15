@@ -1,6 +1,18 @@
 module Brainfuck where
 
-data Tape = Tape [Int] Int
+data Tape = Tape [Int] Int | TapeError deriving Show
+
+shiftTape :: Int -> Tape -> Tape
+shiftTape n (Tape t p)
+    | p + n >= length t || p + n < 0 = TapeError
+    | otherwise                      = Tape t ((p + n) `mod` length t)
+
+alterTape :: Int -> Tape -> Tape
+alterTape n (Tape t p) = Tape (replace t p ((item + n) `mod` 256)) p where
+    item = t !! p
+    replace l i n
+        | i == 0    = n : tail l
+        | otherwise = let (x,_:xs) = splitAt i l in x ++ n : l
 
 interpret :: String -> IO ()
 interpret code = interpret' code (Tape [0] 0) where
