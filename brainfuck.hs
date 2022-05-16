@@ -54,6 +54,7 @@ parse (t:ts)
     | otherwise = parse ts
     where
         sequence :: Eq a => [a] -> [a] -> [a]
+        sequence _   []     = []
         sequence _   (x:[]) = [x]
         sequence ops (x:y:xs)
             | not (x `elem` ops)                 = []
