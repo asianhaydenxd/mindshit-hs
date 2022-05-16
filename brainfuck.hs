@@ -2,7 +2,8 @@ module Brainfuck where
 
 data Tape = Tape [Int] Int | TapeError
 
-newTape :: Tape = Tape [0] 0
+newTape :: Tape
+newTape = Tape [0] 0
 
 shiftTape :: Int -> Tape -> Tape
 shiftTape n (Tape t p)
@@ -19,14 +20,6 @@ alterTape n (Tape t p) = Tape (replace t p ((item + n) `mod` 256)) p where
 
 setTape :: Int -> Tape -> Tape
 setTape n (Tape t p) = alterTape n $ alterTape (-(t !! p)) (Tape t p)
-
-shiftRight :: Tape -> Tape = shiftTape 1
-
-shiftLeft :: Tape -> Tape = shiftTape (-1)
-
-increment :: Tape -> Tape = alterTape 1
-
-decrement :: Tape -> Tape = alterTape (-1)
 
 
 data Token = OpRight | OpLeft | OpPlus | OpMinus | OpRead | OpWrite | OpWhile | OpEnd deriving Eq
@@ -79,9 +72,11 @@ parse (t:ts)
         occurDifference x y xs = (length . filter (x ==)) xs - (length . filter (y ==)) xs
 
 
-intToAscii :: Int -> Char = toEnum
+intToAscii :: Int -> Char
+intToAscii = toEnum
 
-asciiToInt :: Char -> Int = fromEnum
+asciiToInt :: Char -> Int
+asciiToInt = fromEnum
 
 interpret :: String -> IO (Tape)
 interpret code = interpret' (parse $ tokenize code) (Tape [0] 0) where
@@ -91,5 +86,5 @@ interpret code = interpret' (parse $ tokenize code) (Tape [0] 0) where
     interpret' (Shift n:cs) t = interpret' cs (shiftTape n t)
     interpret' (Add   n:cs) t = interpret' cs (alterTape n t)
     interpret' (Read   :cs) t = getChar >>= (\a -> interpret' cs $ setTape (asciiToInt a) t)
-    interpret' (Write  :cs) (Tape t p) = (putChar . intToAscii) (t !! p) >> interpret' cs (Tape t p) -- make function to print pointed value's ASCII equivalent
+    interpret' (Write  :cs) (Tape t p) = (putChar . intToAscii) (t !! p) >> interpret' cs (Tape t p)
     interpret' (Loop  c:cs) (Tape t p) = if t !! p > 0 then interpret' c (Tape t p) >>= \tape -> interpret' (Loop c:cs) tape else interpret' cs (Tape t p)
