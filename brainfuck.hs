@@ -15,7 +15,10 @@ alterTape n (Tape t p) = Tape (replace t p ((item + n) `mod` 256)) p where
     item = t !! p
     replace l i n
         | i == 0    = n : tail l
-        | otherwise = let (x,_:xs) = splitAt i l in x ++ n : l
+        | otherwise = let (x,_:xs) = splitAt i l in x ++ n : xs
+
+setTape :: Int -> Tape -> Tape
+setTape n (Tape t p) = alterTape n $ alterTape (-(t !! p)) (Tape t p)
 
 shiftRight :: Tape -> Tape = shiftTape 1
 
