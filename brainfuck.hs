@@ -24,9 +24,26 @@ increment :: Tape -> Tape = alterTape 1
 
 decrement :: Tape -> Tape = alterTape (-1)
 
+
+data Operator = OpRight | OpLeft | OpPlus | OpMinus | OpRead | OpWrite | OpWhile | OpEnd deriving Show
+
+type Code = [Operator]
+
+tokenize :: String -> Code
+tokenize []       = []
+tokenize ('>':xs) = OpRight : tokenize xs
+tokenize ('<':xs) = OpLeft  : tokenize xs
+tokenize ('+':xs) = OpPlus  : tokenize xs
+tokenize ('-':xs) = OpMinus : tokenize xs
+tokenize (',':xs) = OpRead  : tokenize xs
+tokenize ('.':xs) = OpWrite : tokenize xs
+tokenize ('[':xs) = OpWhile : tokenize xs
+tokenize (']':xs) = OpEnd   : tokenize xs
+tokenize (_:xs)   = tokenize xs
+
 interpret :: String -> IO ()
-interpret code = interpret' code (Tape [0] 0) where
-    interpret' :: String -> Tape -> IO ()
+interpret code = interpret' (tokenize code) (Tape [0] 0) where
+    interpret' :: Code -> Tape -> IO ()
     interpret' _ TapeError       = putStrLn "exit: tapeError"
     interpret' [] _              = putStrLn "exit"
     interpret' (c:cs) (Tape t p) = undefined
