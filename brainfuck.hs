@@ -1,6 +1,6 @@
 module Brainfuck where
 
-data Tape = Tape [Int] Int | TapeError deriving Show
+data Tape = Tape [Int] Int | TapeError
 
 newTape :: Tape = Tape [0] 0
 
@@ -29,7 +29,7 @@ increment :: Tape -> Tape = alterTape 1
 decrement :: Tape -> Tape = alterTape (-1)
 
 
-data Token = OpRight | OpLeft | OpPlus | OpMinus | OpRead | OpWrite | OpWhile | OpEnd deriving (Show, Eq)
+data Token = OpRight | OpLeft | OpPlus | OpMinus | OpRead | OpWrite | OpWhile | OpEnd deriving Eq
 
 tokenize :: String -> [Token]
 tokenize []       = []
@@ -44,7 +44,7 @@ tokenize (']':xs) = OpEnd   : tokenize xs
 tokenize (_:xs)   = tokenize xs
 
 
-data Node = Shift Int | Add Int | Read | Write | Loop [Node] deriving Show
+data Node = Shift Int | Add Int | Read | Write | Loop [Node]
 
 parse :: [Token] -> [Node]
 parse [] = []
