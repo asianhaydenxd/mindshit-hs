@@ -25,11 +25,9 @@ increment :: Tape -> Tape = alterTape 1
 decrement :: Tape -> Tape = alterTape (-1)
 
 
-data Operator = OpRight | OpLeft | OpPlus | OpMinus | OpRead | OpWrite | OpWhile | OpEnd deriving (Show, Eq)
+data Token = OpRight | OpLeft | OpPlus | OpMinus | OpRead | OpWrite | OpWhile | OpEnd deriving (Show, Eq)
 
-type Code = [Operator]
-
-tokenize :: String -> Code
+tokenize :: String -> [Token]
 tokenize []       = []
 tokenize ('>':xs) = OpRight : tokenize xs
 tokenize ('<':xs) = OpLeft  : tokenize xs
@@ -44,7 +42,7 @@ tokenize (_:xs)   = tokenize xs
 
 data Node = Shift Int | Add Int | Read | Write | Loop [Node] deriving Show
 
-parse :: Code -> [Node]
+parse :: [Token] -> [Node]
 parse [] = []
 parse (t:ts)
     | t `elem` [OpRight, OpLeft] = let s = sequence [OpRight, OpLeft] (t:ts) in (Shift $ occurDifference OpRight OpLeft s) : parse (drop (length s) (t:ts))
@@ -64,7 +62,7 @@ parse (t:ts)
         occurDifference :: Eq a => a -> a -> [a] -> Int
         occurDifference x y xs = (length . filter (x ==)) xs - (length . filter (y ==)) xs
 
-        splitInnerOuter :: [Operator] -> ([Operator], [Operator])
+        splitInnerOuter :: [Token] -> ([Token], [Token])
         splitInnerOuter xs = split' xs 0 0 where
             split' (OpEnd:ys)   i 0 = splitAt i xs
             split' (OpEnd:ys)   i n = split' ys (i + 1) (n - 1)
