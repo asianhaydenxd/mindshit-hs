@@ -76,9 +76,18 @@ parse (t:ts)
             split' (OpWhile:ys) i n = split' ys (i + 1) (n + 1)
             split' (_:ys)       i n = split' ys (i + 1) n
 
-interpret :: String -> IO ()
+
+intToAscii :: Int -> Char = toEnum
+
+asciiToInt :: Char -> Int = fromEnum
+
+interpret :: String -> IO (Tape)
 interpret code = interpret' (parse $ tokenize code) (Tape [0] 0) where
-    interpret' :: [Node] -> Tape -> IO ()
-    interpret' _ TapeError       = putStrLn "exit: tapeError"
-    interpret' [] _              = putStrLn "exit"
-    interpret' (c:cs) (Tape t p) = undefined
+    interpret' :: [Node] -> Tape -> IO (Tape)
+    interpret' _ TapeError    = putStrLn "exit: tapeError" >> return TapeError
+    interpret' [] t           = return t
+    interpret' (Shift n:cs) t = interpret' cs (shiftTape n t)
+    interpret' (Add   n:cs) t = interpret' cs (alterTape n t)
+    interpret' (Read   :cs) t = getChar >>= (\a -> interpret' cs $ setTape (asciiToInt a) t)
+    interpret' (Write  :cs) (Tape t p) = (putChar . intToAscii) (t !! p) >> interpret' cs (Tape t p) -- make function to print pointed value's ASCII equivalent
+    interpret' (Loop  c:cs) (Tape t p) = if t !! p > 0 then interpret' c (Tape t p) >>= \tape -> interpret' (Loop c:cs) tape else interpret' cs (Tape t p)
