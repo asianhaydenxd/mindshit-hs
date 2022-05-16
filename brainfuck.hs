@@ -55,11 +55,13 @@ parse (t:ts)
     where
         sequence :: Eq a => [a] -> [a] -> [a]
         sequence _   []     = []
-        sequence _   (x:[]) = [x]
+        sequence ops (x:[])
+            | x `elem` ops = [x]
+            | otherwise    = []
         sequence ops (x:y:xs)
-            | not (x `elem` ops)                 = []
-            | x `elem` ops && not (y `elem` ops) = [x]
-            | x `elem` ops && y `elem` ops       = x : y : sequence ops xs
+            | x `elem` ops && y `elem` ops = x : y : sequence ops xs
+            | x `elem` ops                 = [x]
+            | otherwise                    = []
         
         occurDifference :: Eq a => a -> a -> [a] -> Int
         occurDifference x y xs = (length . filter (x ==)) xs - (length . filter (y ==)) xs
