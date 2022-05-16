@@ -48,13 +48,22 @@ data Node = Shift Int | Add Int | Read | Write | Loop [Node]
 
 parse :: [Token] -> [Node]
 parse [] = []
+parse (OpRead:ts)  = Read  : parse ts
+parse (OpWrite:ts) = Write : parse ts
+parse (OpWhile:ts) = Loop (parse is) : parse os where
+    splitInnerOuter :: [Token] -> ([Token], [Token])
+    splitInnerOuter xs = split' xs 0 0 where
+        split' (OpEnd:ys)   i 0 = splitAt i xs
+        split' (OpEnd:ys)   i n = split' ys (i + 1) (n - 1)
+        split' (OpWhile:ys) i n = split' ys (i + 1) (n + 1)
+        split' (_:ys)       i n = split' ys (i + 1) n
+    
+    (is, os) = splitInnerOuter ts
+
 parse (t:ts)
     | t `elem` [OpRight, OpLeft] = let s = sequence [OpRight, OpLeft] (t:ts) in (Shift $ occurDifference OpRight OpLeft s) : parse (drop (length s) (t:ts))
     | t `elem` [OpPlus, OpMinus] = let s = sequence [OpPlus, OpMinus] (t:ts) in (Add   $ occurDifference OpPlus OpMinus s) : parse (drop (length s) (t:ts))
-    | t == OpRead                = Read  : parse ts
-    | t == OpWrite               = Write : parse ts
-    | t == OpWhile               = let (is, os) = splitInnerOuter ts in Loop (parse is) : parse os
-    | otherwise = parse ts
+    | otherwise                  = parse ts
     where
         sequence :: Eq a => [a] -> [a] -> [a]
         sequence _   []     = []
@@ -68,13 +77,6 @@ parse (t:ts)
         
         occurDifference :: Eq a => a -> a -> [a] -> Int
         occurDifference x y xs = (length . filter (x ==)) xs - (length . filter (y ==)) xs
-
-        splitInnerOuter :: [Token] -> ([Token], [Token])
-        splitInnerOuter xs = split' xs 0 0 where
-            split' (OpEnd:ys)   i 0 = splitAt i xs
-            split' (OpEnd:ys)   i n = split' ys (i + 1) (n - 1)
-            split' (OpWhile:ys) i n = split' ys (i + 1) (n + 1)
-            split' (_:ys)       i n = split' ys (i + 1) n
 
 
 intToAscii :: Int -> Char = toEnum
