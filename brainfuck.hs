@@ -6,8 +6,9 @@ newTape :: Tape = Tape [0] 0
 
 shiftTape :: Int -> Tape -> Tape
 shiftTape n (Tape t p)
-    | p + n >= length t || p + n < 0 = TapeError
-    | otherwise                      = Tape t ((p + n) `mod` length t)
+    | p + n < 0         = TapeError
+    | p + n >= length t = Tape (t ++ (replicate (p + n + 1 - length t) 0)) (p + n)
+    | otherwise         = Tape t (p + n)
 
 alterTape :: Int -> Tape -> Tape
 alterTape n (Tape t p) = Tape (replace t p ((item + n) `mod` 256)) p where
